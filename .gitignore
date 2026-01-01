@@ -30,3 +30,4 @@ ENV/
 models/*.keras
 models/*.h5
 models/*.pt
+static/
