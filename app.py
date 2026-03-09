@@ -57,7 +57,8 @@ def predict():
                 "status": "success",
                 "message": "Analysis Complete",
                 "detect_url": f"{base_url}{result_data['detect_url']}",
-                "detections_count": result_data['detections']
+                "detections_count": result_data['detections'],
+                "details": result_data['details']
             })
 
         except Exception as e:

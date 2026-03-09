@@ -32,3 +32,4 @@ models/*.h5
 models/*.pt
 static/
 uploads/
+cek_model.py
