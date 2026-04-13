@@ -2,3 +2,6 @@ Flask==3.0.0
 flask-cors==4.0.0
 ultralytics==8.3.0
 opencv-python-headless==4.9.0.80
+transformers==4.40.0
+torch==2.3.0
+Pillow==10.3.0

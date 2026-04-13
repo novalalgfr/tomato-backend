@@ -1,39 +1,69 @@
 import os
 import cv2
 import uuid
+import numpy as np
+from PIL import Image
+
+from utils.tomato_validator import is_tomato_leaf_crop
+
 
 def process_image(model, image_path, static_folder='static'):
     original_img = cv2.imread(image_path)
     if original_img is None:
         raise ValueError("Gambar tidak valid/corrupt")
-    
+
     results = model.predict(original_img, conf=0.50)
     result = results[0]
     boxes = result.boxes
-    
+
+    valid_indices = []
+    for i, box in enumerate(boxes):
+        x1, y1, x2, y2 = map(int, box.xyxy[0])
+
+        h, w = original_img.shape[:2]
+        x1, y1 = max(0, x1), max(0, y1)
+        x2, y2 = min(w, x2), min(h, y2)
+
+        crop_bgr = original_img[y1:y2, x1:x2]
+        crop_pil = Image.fromarray(cv2.cvtColor(crop_bgr, cv2.COLOR_BGR2RGB))
+
+        if is_tomato_leaf_crop(crop_pil):
+            valid_indices.append(i)
+
     detailed_detections = []
-    for box in boxes:
-        class_id = int(box.cls[0])
+    for i in valid_indices:
+        box = boxes[i]
+        class_id   = int(box.cls[0])
         class_name = model.names[class_id]
         confidence = float(box.conf[0])
-        
         detailed_detections.append({
             "class_name": class_name,
-            "confidence": round(confidence * 100, 2)
+            "confidence": round(confidence * 100, 2),
         })
 
-    annotated_img = result.plot()
-    unique_id = str(uuid.uuid4())[:8]
-    
+    if valid_indices:
+        filtered_boxes = result.boxes[valid_indices]
+
+        from ultralytics.engine.results import Results
+        filtered_result = Results(
+            orig_img=original_img,
+            path=image_path,
+            names=model.names,
+            boxes=filtered_boxes.data,
+        )
+        annotated_img = filtered_result.plot()
+    else:
+        annotated_img = original_img.copy()
+
+    unique_id   = str(uuid.uuid4())[:8]
     results_dir = os.path.join(static_folder, 'results')
     os.makedirs(results_dir, exist_ok=True)
     detect_filename = f"detect_{unique_id}.jpg"
-    detect_path = os.path.join(results_dir, detect_filename)
+    detect_path     = os.path.join(results_dir, detect_filename)
     cv2.imwrite(detect_path, annotated_img)
-    base_url = "/static/results"
-    
+
     return {
-        'detect_url': f"{base_url}/{detect_filename}",
-        'detections': len(boxes),
-        'details': detailed_detections
+        'detect_url' : f"/static/results/{detect_filename}",
+        'detections' : len(valid_indices),
+        'details'    : detailed_detections,
     }
