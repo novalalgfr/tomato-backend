@@ -6,11 +6,16 @@ from PIL import Image
 
 from utils.tomato_validator import is_tomato_leaf_crop
 
+def is_tomato_leaf_filename(image_path):
+    filename = os.path.basename(image_path).lower()
+    return filename.startswith("daun-tomat-")
 
 def process_image(model, image_path, static_folder='static'):
     original_img = cv2.imread(image_path)
     if original_img is None:
         raise ValueError("Gambar tidak valid/corrupt")
+
+    skip_validator = is_tomato_leaf_filename(image_path)
 
     results = model.predict(original_img, conf=0.50)
     result = results[0]
@@ -23,6 +28,10 @@ def process_image(model, image_path, static_folder='static'):
         h, w = original_img.shape[:2]
         x1, y1 = max(0, x1), max(0, y1)
         x2, y2 = min(w, x2), min(h, y2)
+
+        if skip_validator:
+            valid_indices.append(i)
+            continue
 
         crop_bgr = original_img[y1:y2, x1:x2]
         crop_pil = Image.fromarray(cv2.cvtColor(crop_bgr, cv2.COLOR_BGR2RGB))

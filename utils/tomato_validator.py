@@ -7,36 +7,9 @@ POSITIVE_LABELS = [
     "a diseased tomato leaf",
     "a healthy tomato plant leaf",
     "tomato foliage",
-    
-	# "a tomato leaf with early blight",
-    # "a tomato leaf with late blight",
-    # "a tomato leaf damaged by leaf miner",
-    # "a tomato leaf with leaf mold",
-    # "a tomato leaf infected with mosaic virus",
-    # "a tomato leaf with septoria leaf spot",
-    # "a tomato leaf damaged by spider mites",
-    # "a tomato leaf with yellow leaf curl virus",
 ]
 
 NEGATIVE_LABELS = [
-    # "a mango leaf",
-    # "a cassava leaf",
-    # "a grape leaf",
-    # "an apple leaf",
-    # "a blueberry leaf",
-    # "a cherry leaf",
-    # "a corn leaf",
-    # "an orange leaf",
-    # "a potato leaf",
-    # "a bell pepper leaf",
-    # "a peach leaf",
-    # "a non-plant object",
-    # "food",
-    # "an animal",
-    # "a human",
-    # "a document",
-    # "a building",
-    
 	"a mango leaf",
     "mango tree leaves",
     "a long oval shiny leaf",
@@ -53,7 +26,6 @@ CONFIDENCE_THRESHOLD = 0.35
 
 _clip_model     = None
 _clip_processor = None
-
 
 def _load_clip():
     global _clip_model, _clip_processor
