@@ -17,9 +17,20 @@ def process_image(model, image_path, static_folder='static'):
 
     skip_validator = is_tomato_leaf_filename(image_path)
 
+    # --- Cek apakah gambar mengandung daun tomat sama sekali ---
+    if not skip_validator:
+        full_image_pil = Image.fromarray(cv2.cvtColor(original_img, cv2.COLOR_BGR2RGB))
+        if not is_tomato_leaf_crop(full_image_pil):
+            return {
+                'detect_url' : None,
+                'detections' : 0,
+                'details'    : [],
+                'message'    : 'no_detection',
+            }
+
     results = model.predict(original_img, conf=0.50)
-    result = results[0]
-    boxes = result.boxes
+    result  = results[0]
+    boxes   = result.boxes
 
     valid_indices = []
     for i, box in enumerate(boxes):
@@ -39,9 +50,19 @@ def process_image(model, image_path, static_folder='static'):
         if is_tomato_leaf_crop(crop_pil):
             valid_indices.append(i)
 
+    # --- Tidak ada deteksi apapun (daun tomat tapi sehat) ---
+    if not valid_indices:
+        return {
+            'detect_url' : None,
+            'detections' : 0,
+            'details'    : [],
+            'message'    : 'no_detection',
+        }
+
+    # --- Ada penyakit terdeteksi ---
     detailed_detections = []
     for i in valid_indices:
-        box = boxes[i]
+        box        = boxes[i]
         class_id   = int(box.cls[0])
         class_name = model.names[class_id]
         confidence = float(box.conf[0])
@@ -50,22 +71,19 @@ def process_image(model, image_path, static_folder='static'):
             "confidence": round(confidence * 100, 2),
         })
 
-    if valid_indices:
-        filtered_boxes = result.boxes[valid_indices]
+    filtered_boxes = result.boxes[valid_indices]
 
-        from ultralytics.engine.results import Results
-        filtered_result = Results(
-            orig_img=original_img,
-            path=image_path,
-            names=model.names,
-            boxes=filtered_boxes.data,
-        )
-        annotated_img = filtered_result.plot()
-    else:
-        annotated_img = original_img.copy()
+    from ultralytics.engine.results import Results
+    filtered_result = Results(
+        orig_img=original_img,
+        path=image_path,
+        names=model.names,
+        boxes=filtered_boxes.data,
+    )
+    annotated_img = filtered_result.plot()
 
-    unique_id   = str(uuid.uuid4())[:8]
-    results_dir = os.path.join(static_folder, 'results')
+    unique_id      = str(uuid.uuid4())[:8]
+    results_dir    = os.path.join(static_folder, 'results')
     os.makedirs(results_dir, exist_ok=True)
     detect_filename = f"detect_{unique_id}.jpg"
     detect_path     = os.path.join(results_dir, detect_filename)
@@ -75,4 +93,5 @@ def process_image(model, image_path, static_folder='static'):
         'detect_url' : f"/static/results/{detect_filename}",
         'detections' : len(valid_indices),
         'details'    : detailed_detections,
+        'message'    : 'disease_detected',
     }
