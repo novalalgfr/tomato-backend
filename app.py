@@ -45,7 +45,6 @@ def home():
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    # --- Validasi file ---
     if 'file' not in request.files:
         return jsonify({"status": "error", "error": "No file part"}), 400
 
@@ -57,7 +56,6 @@ def predict():
     if not allowed_file(file.filename):
         return jsonify({"status": "error", "error": "File type not allowed. Use JPG/PNG."}), 400
 
-    # --- Validasi model ---
     if model is None:
         return jsonify({"status": "error", "error": "Model AI belum siap."}), 500
 
