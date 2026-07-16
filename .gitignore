@@ -27,9 +27,6 @@ ENV/
 .venv
 .vscode/
 .idea/
-models/*.keras
-models/*.h5
-models/*.pt
 static/
 uploads/
 cek_model.py
