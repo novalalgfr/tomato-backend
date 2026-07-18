@@ -37,7 +37,6 @@ def _load_clip():
         print("[INFO] CLIP model loaded.")
     return _clip_model, _clip_processor
 
-
 def _validate_pil(image: Image.Image) -> dict:
     model, processor = _load_clip()
 
@@ -75,7 +74,6 @@ def _validate_pil(image: Image.Image) -> dict:
         ),
     }
 
-
 def is_tomato_leaf_crop(image: Image.Image) -> bool:
     result = _validate_pil(image)
     print(
@@ -83,7 +81,6 @@ def is_tomato_leaf_crop(image: Image.Image) -> bool:
         f"label='{result['label']}' | pos_score={result['positive_score']}"
     )
     return result["valid"]
-
 
 def is_tomato_leaf(image_path: str) -> dict:
     try:

@@ -24,16 +24,13 @@ except Exception as e:
     print(f"WARNING: Model gagal diload. Error: {e}")
     model = None
 
-
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
 
 MESSAGE_MAP = {
     'no_detection'    : 'Tidak ada penyakit daun tomat yang terdeteksi',
     'disease_detected': 'Analysis Complete',
 }
-
 
 @app.route('/')
 def home():
@@ -41,7 +38,6 @@ def home():
         "status" : "running",
         "message": "Tomato.Logy AI Backend is Operational."
     })
-
 
 @app.route('/predict', methods=['POST'])
 def predict():
